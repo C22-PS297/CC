@@ -7,6 +7,7 @@ import {
     addDoc,
     deleteDoc,
     updateDoc,
+    getDocs,
 } from 'firebase/firestore';
 import BCrypt from 'bcrypt';
 import db from '../database/db.js';
@@ -19,6 +20,15 @@ export async function addUser (request, response) {
         email,
         phone
     } = request.body;
+
+    const passHashed = BCrypt.hashSync(pass, 10);
+    const userCol = collection (db, 'users');
+
+    const emailQuery = query(userCol, where('email', '==', email));
+    const emailFound = await getDocs (emailQuery);
+
+    const phoneQuery = query(userCol, where('phone', '==', phone));
+    const phoneFound = await getDocs (phoneQuery);
     
     if (!name || !pass || !email || !phone) {
         response.status(417).json({
@@ -27,13 +37,29 @@ export async function addUser (request, response) {
         });
         return;
     }
+
+    if (!emailFound.empty){
+        response.status(406).json({
+            status: 'Fail',
+            message: 'Email has been used'
+        });
+        return;
+    }
+
+    if (!phoneFound.empty){
+        response.status(406).json({
+            status: 'Fail',
+            message: 'Phone number has been used'
+        });
+        return;
+    }
+
     const user = {
         name: name,
-        pass: pass,
+        pass: passHashed,
         email: email,
         phone: phone
     }
-    const userCol = collection (db, 'users');
 
     await addDoc (userCol, user).then (() => {
         response.status(201).json({
