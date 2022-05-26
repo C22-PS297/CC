@@ -12,6 +12,8 @@ import {
 import BCrypt from 'bcrypt';
 import db from '../database/db.js';
 import User from '../model/user.js';
+import { async } from '@firebase/util';
+import user from '../model/user.js';
 
 export async function addUser (request, response) {
     const {
@@ -76,4 +78,61 @@ export async function addUser (request, response) {
     })
     return;
 
-}
+};
+
+export async function getAllUser (request, response) {
+    try {
+        const userCol = collection(db, 'users');
+        const userSnap = await getDocs (userCol);
+        const users = userSnap.docs.map(user => user.data());
+        const id = userSnap.docs.map(user => user.id);
+
+        response.status(200).json({
+            status: "Success",
+            message: "Data successfully obtained",
+            //how to display id in data
+            data: users
+        });
+        return;
+    }
+    catch (err) {
+        response.status(500).json({
+            status: "Fail",
+            message: "Data failed to get"
+        });
+        return;
+    }
+};
+
+export async function getUserById (request, response) {
+    const id = request.params.id;
+    const idRef = doc(db, 'users', id);
+    console.log(id);
+    await getDoc(idRef).then(userSnap => {
+        if (!userSnap.exists()) {
+            response.status(404).json({
+                status: "Fail",
+                message: "User not found"
+            });
+            return;
+        }
+
+        const user = {
+            id: userSnap.id,
+            ...userSnap.data()
+        }
+
+        response.status(200).json({
+            status: "Success",
+            message: "User successfully obtained",
+            data: user
+        })
+        return;
+    }).catch(err => {
+        response.status(500).json({
+            status: "Fail",
+            message: "Server not found"
+        })
+        return;
+    });
+};
