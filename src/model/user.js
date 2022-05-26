@@ -1,6 +1,5 @@
 class User {
-    constructor (id, name, pass, email, phone) {
-        this.id = id;
+    constructor (name, pass, email, phone) {
         this.name = name;
         this.pass = pass;
         this.email = email;
@@ -16,3 +15,5 @@ class Book {
         this.longitude = longitude;
     }
 }
+
+export default new User();
