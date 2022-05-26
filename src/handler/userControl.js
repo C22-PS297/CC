@@ -73,7 +73,7 @@ export async function addUser (request, response) {
     }).catch(err => {
         response.status(500).json({
             status: 'Fail',
-            message: 'Try Again'
+            message: "Not available"
         })
     })
     return;
@@ -98,7 +98,7 @@ export async function getAllUser (request, response) {
     catch (err) {
         response.status(500).json({
             status: "Fail",
-            message: "Data failed to get"
+            message: "Not available"
         });
         return;
     }
@@ -107,7 +107,6 @@ export async function getAllUser (request, response) {
 export async function getUserById (request, response) {
     const id = request.params.id;
     const idRef = doc(db, 'users', id);
-    console.log(id);
     await getDoc(idRef).then(userSnap => {
         if (!userSnap.exists()) {
             response.status(404).json({
@@ -131,8 +130,91 @@ export async function getUserById (request, response) {
     }).catch(err => {
         response.status(500).json({
             status: "Fail",
-            message: "Server not found"
+            message: "Not available"
         })
         return;
     });
 };
+
+export async function removeUser (request, response){
+    const id = request.params.id;
+    const idRef = doc(db, 'users', id);
+    
+    await deleteDoc(idRef).then(() => {
+        response.status(200).json({
+            status: 'Success',
+            message: 'User deleted successfully'
+        });
+        return;
+    }).catch(err => {
+        response.status(500).json({
+            status: 'Fail',
+            message: "Not available"
+        });
+        return;
+    });
+}
+
+export async function updateUser (request, response){
+    const id = request.params.id;
+    const idRef = doc(db, 'users', id);
+    const {
+        name,
+        pass,
+        email,
+        phone
+    } = request.body;
+
+    await getDoc(idRef).then(async userSnap => {
+        if (!userSnap.exists()) {
+            response.status(404).json({
+                status: 'Fail',
+                message: 'User not found'
+            });
+            return;
+        }
+
+        const user = {
+            id: userSnap.id,
+            ...userSnap.data()
+        }
+
+        if (name) {
+            user.name = name;
+        }
+
+        if (pass) {
+            user.pass = BCrypt.hashSync(pass, 10);
+        }
+
+        if (email) {
+            user.email = email;
+        }
+
+        if (phone) {
+            user.phone = phone;
+        }
+
+        await updateDoc(idRef, {...user}).then(() => {
+            response.status(200).json({
+                status: 'Success',
+                message: 'User updated successfully'
+            });
+            return;
+        }).catch(err => {
+            response.status(500).json({
+                status: 'Fail',
+                message: "Not available"
+            });
+            return;
+        })
+        return;
+
+    }).catch(err => {
+        response.status(500).json({
+            status: 'Fail',
+            message: "Not available"
+        });
+        return;
+    });
+}
