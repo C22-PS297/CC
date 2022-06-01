@@ -10,8 +10,6 @@ import user from "../model/user.js";
 
 export async function addBook (request, response) {
     const {
-        userId, 
-        bookId, 
         image, 
         name, 
         category, 
@@ -24,7 +22,7 @@ export async function addBook (request, response) {
     const userCol = collection(db, 'users');
     const userSnap = await getDoc (userCol);
     const user = userSnap.docs.map(user => user.data());
-    const Id = userSnap.docs.map(user => user.id);
+    const Id = user.docs.map(user => user.id);
 
     if (!image || !latitude, !longitude) {
         response.status(417).json({
@@ -35,8 +33,6 @@ export async function addBook (request, response) {
     }
 
     const book = {
-        userId : Id,
-        bookId : bookId,
         image : image, 
         name : name, 
         category : category,
