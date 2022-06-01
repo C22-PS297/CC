@@ -10,10 +10,13 @@ import user from "../model/user.js";
 
 export async function addBook (request, response) {
     const {
-        userId,
-        image,
-        latitude,
-        longitude
+        userId, 
+        bookId, 
+        image, 
+        name, 
+        category, 
+        weight, 
+        price
     } = request.body;
 
     const bookCol = collection(db, 'books');
@@ -32,10 +35,13 @@ export async function addBook (request, response) {
     }
 
     const book = {
-        userId: Id,
-        image: image,
-        latitude: latitude,
-        longitude: longitude
+        userId : Id,
+        bookId : bookId,
+        image : image, 
+        name : name, 
+        category : category,
+        weight : weight,
+        price : price,
     }
 
     await addDoc (bookCol, book).then(() => {

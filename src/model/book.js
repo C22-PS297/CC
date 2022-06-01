@@ -1,9 +1,12 @@
 class Book {
-    constructor (userId, image, latitude, longitude) {
+    constructor (userId, bookId, image, name, category, weight, price) {
         this.userId = userId;
+        this.bookId = bookId;
         this.image = image;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.name = name;
+        this.category = category;
+        this.weight = weight;
+        this.price = price;
     }
 }
 
