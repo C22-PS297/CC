@@ -9,6 +9,11 @@ import {
     updateDoc,
     getDocs,
 } from 'firebase/firestore';
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+} from 'firebase/auth'
 import BCrypt from 'bcrypt';
 import db from '../database/db.js';
 import User from '../model/user.js';
@@ -33,6 +38,8 @@ export async function addUser (request, response) {
 
     const phoneQuery = query(userCol, where('phone', '==', phone));
     const phoneFound = await getDocs (phoneQuery);
+
+    const auth = getAuth();
     
     if (!name || !pass || !email || !phone) {
         response.status(417).json({
@@ -58,8 +65,15 @@ export async function addUser (request, response) {
         return;
     }
 
+    if (pass.length < 6) {
+        response.status(406).json({
+            status: 'Fail',
+            message: 'Password must be more than 6'
+        });
+        return;
+    }
+
     const user = {
-        // id: id,
         name: name,
         pass: passHashed,
         email: email,
@@ -80,9 +94,22 @@ export async function addUser (request, response) {
             status: 'Fail',
             message: "Not available"
         })
-    })
-    return;
+        return;
+    });
 
+    await createUserWithEmailAndPassword (auth, email, pass).then((userCredential) => {
+        response.status(201).json({
+            status: 'Success',
+            message: 'Data successfully added',
+        })
+        return;
+    }).catch(err => {
+        response.status(500).json({
+            status: 'Fail',
+            message: "Not available"
+        })
+        return;
+    });
 };
 
 export async function getAllUser (request, response) {
@@ -167,7 +194,9 @@ export async function updateUser (request, response){
         name,
         pass,
         email,
-        phone
+        phone,
+        longitude,
+        latitude
     } = request.body;
 
     await getDoc(idRef).then(async userSnap => {
@@ -200,6 +229,14 @@ export async function updateUser (request, response){
             user.phone = phone;
         }
 
+        if (latitude) {
+            user.latitude = latitude;
+        }
+
+        if (longitude) {
+            user.longitude = longitude;
+        }
+
         await updateDoc(idRef, {...user}).then(() => {
             response.status(200).json({
                 status: 'Success',
@@ -216,6 +253,58 @@ export async function updateUser (request, response){
         return;
 
     }).catch(err => {
+        response.status(500).json({
+            status: 'Fail',
+            message: "Not available"
+        });
+        return;
+    });
+};
+
+export async function loginControl (request, response) {
+    const {
+        email,
+        pass,
+    } = request.body;
+
+    const userCol = collection (db, 'users');
+    
+    const emailQuery = query(userCol, where('email', '==', email));
+    const emailFound = await getDocs (emailQuery);
+
+    const user = {
+        id: emailFound.docs[0].id,
+        ...emailFound.docs[0].data()
+    } 
+
+    const passMatch = await BCrypt.compare(pass, user.pass);
+    
+    const auth =  getAuth ();
+
+    if (emailFound.empty){
+        response.status(404).json({
+            status: 'Fail',
+            message: 'Email invalid'
+        });
+        return;
+    }
+
+    if (!passMatch) {
+        response.status(404).json({
+            status: 'Fail',
+            message: 'Password invalid'
+        });
+        return;
+    }
+
+    await signInWithEmailAndPassword (auth, email, pass).then((userCredential) => {
+        response.status(201).json({
+            status: 'Success',
+            message: 'Login successfully',
+            data: user
+        });
+        return;
+    }).catch((err) => {
         response.status(500).json({
             status: 'Fail',
             message: "Not available"
