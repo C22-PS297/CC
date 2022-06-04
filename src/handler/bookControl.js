@@ -1,7 +1,11 @@
 import { 
     addDoc, 
     collection, 
-    getDocs
+    query,
+    getDocs,
+    getDoc,
+    doc,
+    where
 } from "firebase/firestore";
 import { async } from "@firebase/util";
 import db from "../database/db.js";
@@ -10,6 +14,7 @@ import user from "../model/user.js";
 
 export async function addBook (request, response) {
     const {
+        userid,
         image, 
         name, 
         category, 
@@ -18,13 +23,8 @@ export async function addBook (request, response) {
     } = request.body;
 
     const bookCol = collection(db, 'books');
-    
-    const userCol = collection(db, 'users');
-    const userSnap = await getDoc (userCol);
-    const user = userSnap.docs.map(user => user.data());
-    const Id = user.docs.map(user => user.id);
 
-    if (!image || !latitude, !longitude) {
+    if (!image || !name || !category) {
         response.status(417).json({
             status: 'Fail',
             message: 'Enter your book data'
@@ -33,12 +33,14 @@ export async function addBook (request, response) {
     }
 
     const book = {
+        userid : userid,
         image : image, 
         name : name, 
         category : category,
         weight : weight,
         price : price,
     }
+    console.log(book);
 
     await addDoc (bookCol, book).then(() => {
         response.status(201).json({
@@ -70,7 +72,6 @@ export async function getAllBook (request, response) {
         response.status(200).json({
             status: "Success",
             message: "Book successfully obtained",
-            //how to display id in data
             data: books
         });
         return;
@@ -82,4 +83,26 @@ export async function getAllBook (request, response) {
         });
         return;
     }
-}
+};
+
+export async function getBookbyuserID (request, response) {
+    const id = request.params.id;
+    const bookCol = collection(db, 'books');
+    const bookQuery = query(bookCol, where ('userid', '==', id ));
+    try {
+        const bookSnap =  await getDocs (bookQuery);
+        const books = bookSnap.docs.map((book) => book.data());
+        response.status(201).json({
+            status: 'Success',
+            message: 'Book successfully obtained',
+            data: books
+        });
+        return;
+    } catch (err) {
+        response.status(404).json({
+            status: 'Fail',
+            message: "Book not found"
+        });
+        return;
+    }   
+};

@@ -20,7 +20,9 @@ export async function addUser (request, response) {
         name,
         pass,
         email,
-        phone
+        phone,
+        longitude,
+        latitude
     } = request.body;
 
     const passHashed = BCrypt.hashSync(pass, 10);
@@ -57,10 +59,13 @@ export async function addUser (request, response) {
     }
 
     const user = {
+        // id: id,
         name: name,
         pass: passHashed,
         email: email,
-        phone: phone
+        phone: phone,
+        longitude: longitude,
+        latitude: latitude
     }
 
     await addDoc (userCol, user).then (() => {

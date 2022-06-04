@@ -1,4 +1,4 @@
-import { addBook } from "../handler/bookControl.js";
+import { addBook, getBookbyuserID } from "../handler/bookControl.js";
 import {
     getUserById,
 } from "../handler/userControl.js";
@@ -8,8 +8,9 @@ const userRoute = express.Router();
 const bookRoute = express.Router();
 
 
-userRoute.get("/:id", getUserById);
+// userRoute.get("/:id", getUserById);
 
 bookRoute.post("/", addBook);
+bookRoute.get("/:id", getBookbyuserID);
 
 export default bookRoute;
