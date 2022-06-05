@@ -13,6 +13,6 @@ app.use('/user', userRoute);
 app.use('/book', bookRoute);
 app.use('/shop', shopRouter);
 
-app.listen(port, ()=>{
+app.listen(process.env.PORT || port, ()=>{
     console.log(`listenin server on http://localhost:${port}`);
 })
