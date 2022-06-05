@@ -20,6 +20,7 @@
   "homepage": "https://github.com/C22-PS297/CC#readme",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
     "express": "^4.18.1",
     "firebase": "^9.8.1"
   },
