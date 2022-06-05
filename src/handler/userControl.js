@@ -38,8 +38,6 @@ export async function addUser (request, response) {
 
     const phoneQuery = query(userCol, where('phone', '==', phone));
     const phoneFound = await getDocs (phoneQuery);
-
-    const auth = getAuth();
     
     if (!name || !pass || !email || !phone) {
         response.status(417).json({
@@ -87,20 +85,6 @@ export async function addUser (request, response) {
             status: 'Success',
             message: 'Data successfully added',
             data: user
-        })
-        return;
-    }).catch(err => {
-        response.status(500).json({
-            status: 'Fail',
-            message: "Not available"
-        })
-        return;
-    });
-
-    await createUserWithEmailAndPassword (auth, email, pass).then((userCredential) => {
-        response.status(201).json({
-            status: 'Success',
-            message: 'Data successfully added',
         })
         return;
     }).catch(err => {
@@ -309,6 +293,30 @@ export async function loginControl (request, response) {
             status: 'Fail',
             message: "Not available"
         });
+        return;
+    });
+};
+
+export async function addUsertoAuth (request, response) {
+
+    const {
+        pass,
+        email,
+    } = request.body;
+
+    const auth = getAuth();
+    
+    await createUserWithEmailAndPassword (auth, email, pass).then((userCredential) => {
+        response.status(201).json({
+            status: 'Success',
+            message: 'Data successfully added',
+        })
+        return;
+    }).catch(err => {
+        response.status(500).json({
+            status: 'Fail',
+            message: "Not available"
+        })
         return;
     });
 }
