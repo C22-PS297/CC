@@ -106,3 +106,21 @@ export async function getBookbyuserID (request, response) {
         return;
     }   
 };
+
+export async function getImageBookByUserId (request, response) {
+    // const id = request.params.id;
+    // const bookCol = collection (db, 'books/.jpg');
+    // const bookQuery = query(bookCol, where ('userid', '=', id));
+    console.log('jjjj');
+    const storage = getStorage();
+    getDownloadURL(ref(storage, 'books.jpg'))
+    .then((url) => {
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = (event) => {
+            const blob = xhr.response;
+        };
+        xhr.open('GET', url);
+        xhr.send();
+    });
+};
