@@ -4,6 +4,7 @@ import {
     query,
     getDocs,
     getDoc,
+    updateDoc,
     doc,
     where
 } from "firebase/firestore";
@@ -24,7 +25,7 @@ export async function addBook (request, response) {
 
     const bookCol = collection(db, 'books');
 
-    if (!image || !name || !category) {
+    if (!image || !name || !weight || !userid) {
         response.status(417).json({
             status: 'Fail',
             message: 'Enter your book data'
@@ -40,7 +41,6 @@ export async function addBook (request, response) {
         weight : weight,
         price : price,
     }
-    console.log(book);
 
     await addDoc (bookCol, book).then(() => {
         response.status(201).json({
@@ -107,20 +107,77 @@ export async function getBookbyuserID (request, response) {
     }   
 };
 
-export async function getImageBookByUserId (request, response) {
-    // const id = request.params.id;
-    // const bookCol = collection (db, 'books/.jpg');
-    // const bookQuery = query(bookCol, where ('userid', '=', id));
-    console.log('jjjj');
-    const storage = getStorage();
-    getDownloadURL(ref(storage, 'books.jpg'))
-    .then((url) => {
-        const xhr = new XMLHttpRequest();
-        xhr.responseType = 'blob';
-        xhr.onload = (event) => {
-            const blob = xhr.response;
-        };
-        xhr.open('GET', url);
-        xhr.send();
+export async function updateBook (request, response) {
+    const id = request.params.id;
+    const idRef = doc(db, 'books', id);
+    const {
+        userid,
+        image, 
+        name, 
+        category, 
+        weight, 
+        price
+    } = request.body;
+
+
+    await getDoc(idRef).then(async bookSnap => {
+        if (!bookSnap.exists()) {
+            response.status(404).json({
+                status: 'Fail',
+                message: 'User not found'
+            });
+            return;
+        }
+
+        const book = {
+            ...bookSnap.data()
+        }
+
+        if (userid) {
+            book.name = userid;
+        }
+
+        if (image) {
+            book.image = image;
+        }
+
+        if (name) {
+            book.name = name;
+        }
+
+        if (category) {
+            book.category = category;
+        }
+
+        if (weight) {
+            book.weight = weight;
+        }
+
+        if (price) {
+            book.price = price;
+        }
+
+        await updateDoc(idRef, {...book}).then(() => {
+            response.status(200).json({
+                status: 'Success',
+                message: 'Book updated successfully',
+                data: book
+            });
+            return;
+        }).catch(err => {
+            response.status(500).json({
+                status: 'Fail',
+                message: "Book cannot update"
+            });
+            return;
+        })
+        return;
+
+    }).catch(err => {
+        response.status(500).json({
+            status: 'Fail',
+            message: "Not available"
+        });
+        return;
     });
-};
+}

@@ -106,7 +106,6 @@ export async function getAllUser (request, response) {
         response.status(200).json({
             status: "Success",
             message: "Data successfully obtained",
-            //how to display id in data
             data: users
         });
         return;
