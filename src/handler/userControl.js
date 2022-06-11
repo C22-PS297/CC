@@ -32,6 +32,7 @@ export async function addUser (request, response) {
 
     const passHashed = BCrypt.hashSync(pass, 10);
     const userCol = collection (db, 'users');
+    const auth = getAuth();
 
     const emailQuery = query(userCol, where('email', '==', email));
     const emailFound = await getDocs (emailQuery);
@@ -80,13 +81,21 @@ export async function addUser (request, response) {
         latitude: latitude
     }
 
-    await addDoc (userCol, user).then (() => {
-        response.status(201).json({
-            status: 'Success',
-            message: 'Data successfully added',
-            data: user
-        })
-        return;
+    await addDoc (userCol, user).then (async () => {
+        await createUserWithEmailAndPassword (auth, email, pass).then((userCredential) => {
+            response.status(201).json({
+                status: 'Success',
+                message: 'Data successfully added',
+                data : user
+            })
+            return;
+        }).catch(err => {
+            response.status(500).json({
+                status: 'Fail',
+                message: "Not available"
+            })
+            return;
+        });
     }).catch(err => {
         response.status(500).json({
             status: 'Fail',
@@ -296,26 +305,3 @@ export async function loginControl (request, response) {
     });
 };
 
-export async function addUsertoAuth (request, response) {
-
-    const {
-        pass,
-        email,
-    } = request.body;
-
-    const auth = getAuth();
-    
-    await createUserWithEmailAndPassword (auth, email, pass).then((userCredential) => {
-        response.status(201).json({
-            status: 'Success',
-            message: 'Data successfully added',
-        })
-        return;
-    }).catch(err => {
-        response.status(500).json({
-            status: 'Fail',
-            message: "Not available"
-        })
-        return;
-    });
-}
