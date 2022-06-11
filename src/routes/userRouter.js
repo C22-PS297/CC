@@ -1,6 +1,5 @@
 import { 
     addUser,
-    addUsertoAuth,
     getAllUser,
     getUserById,
     loginControl,
@@ -18,6 +17,5 @@ userRoute.get("/:id", getUserById);
 userRoute.delete("/:id", removeUser);
 userRoute.put("/:id", updateUser);
 userRoute.post("/login", loginControl);
-userRoute.post("/auth", addUsertoAuth);
 
 export default userRoute;
