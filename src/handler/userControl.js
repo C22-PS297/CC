@@ -26,8 +26,6 @@ export async function addUser (request, response) {
         pass,
         email,
         phone,
-        longitude,
-        latitude
     } = request.body;
 
     const passHashed = BCrypt.hashSync(pass, 10);
@@ -77,8 +75,6 @@ export async function addUser (request, response) {
         pass: passHashed,
         email: email,
         phone: phone,
-        longitude: longitude,
-        latitude: latitude
     }
 
     await addDoc (userCol, user).then (async () => {
@@ -187,8 +183,6 @@ export async function updateUser (request, response){
         pass,
         email,
         phone,
-        longitude,
-        latitude
     } = request.body;
 
     await getDoc(idRef).then(async userSnap => {
@@ -219,14 +213,6 @@ export async function updateUser (request, response){
 
         if (phone) {
             user.phone = phone;
-        }
-
-        if (latitude) {
-            user.latitude = latitude;
-        }
-
-        if (longitude) {
-            user.longitude = longitude;
         }
 
         await updateDoc(idRef, {...user}).then(() => {
